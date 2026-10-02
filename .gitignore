@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# turborepo
+.turbo/
+
+# environment files (secrets) - only .env.example files are committed
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+*.log
+
+# test output
+coverage/
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# deployment tooling
+.vercel/
