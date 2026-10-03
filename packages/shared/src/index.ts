@@ -9,4 +9,5 @@ export * from './pagination.js';
 export * from './permissions.js';
 export * from './pricing.js';
 export * from './settings.js';
+export * from './staff.js';
 export * from './time.js';

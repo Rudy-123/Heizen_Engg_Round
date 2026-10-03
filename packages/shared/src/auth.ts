@@ -4,6 +4,17 @@ import type { Dashboard, Permission } from './permissions.js';
 /** Name of the httpOnly session cookie set by the API (the web app only checks it exists). */
 export const SESSION_COOKIE_NAME = 'fernleaf_session';
 
+/**
+ * The reviewers' accounts from spec §2. They must keep exactly these emails, roles and the
+ * given password, so the staff screens can't change them (or switch them off).
+ */
+export const REVIEWER_ACCOUNT_EMAILS = [
+  'admin@test.com',
+  'kitchen@test.com',
+  'dispatch@test.com',
+  'driver@test.com',
+] as const;
+
 /** Body of POST /api/auth/login. Emails are compared lower-case. */
 export const loginSchema = z.object({
   email: z
