@@ -9,10 +9,10 @@ export function KitchenClock() {
   if (!label) return null;
   return (
     <div
-      className="flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground"
+      className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-xs"
       title="All times in this app are in the kitchen's time zone"
     >
-      <Clock className="size-3.5" />
+      <Clock className="size-3.5 text-primary" />
       <span className="hidden sm:inline">Kitchen time</span>
       <span className="font-medium text-foreground tabular-nums">{label}</span>
     </div>

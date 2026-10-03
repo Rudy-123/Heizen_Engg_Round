@@ -10,7 +10,7 @@ export function Table({ className, ...props }: ComponentProps<'table'>) {
 }
 
 export function TableHeader({ className, ...props }: ComponentProps<'thead'>) {
-  return <thead className={cn('[&_tr]:border-b', className)} {...props} />;
+  return <thead className={cn('bg-muted/50 [&_tr]:border-b', className)} {...props} />;
 }
 
 export function TableBody({ className, ...props }: ComponentProps<'tbody'>) {
@@ -33,7 +33,7 @@ export function TableHead({ className, ...props }: ComponentProps<'th'>) {
   return (
     <th
       className={cn(
-        'h-10 px-3 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground',
+        'h-10 px-3 text-left align-middle text-[11px] font-semibold tracking-wider whitespace-nowrap text-muted-foreground uppercase',
         className,
       )}
       {...props}

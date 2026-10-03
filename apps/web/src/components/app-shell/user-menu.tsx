@@ -29,7 +29,7 @@ export function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-10 gap-2 px-2">
-          <span className="flex size-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+          <span className="flex size-8 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white shadow-sm">
             {initials(user.name)}
           </span>
           <span className="hidden flex-col items-start leading-tight md:flex">

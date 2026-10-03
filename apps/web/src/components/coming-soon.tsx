@@ -4,9 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 /** Placeholder for a section whose screen is built in a later step. */
 export function ComingSoon({ plannedFeatures }: { plannedFeatures: string[] }) {
   return (
-    <Card className="border-dashed">
+    <Card className="border-dashed shadow-none">
       <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
           <Hammer className="size-5" />
         </span>
         <div>

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { selectClassName, useDishes } from '@/lib/catalogue-queries';
 import { useCan } from '@/lib/session';
+import { cn } from '@/lib/utils';
 
 export function DishesTab() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export function DishesTab() {
           />
         </div>
         <select
-          className={`${selectClassName} w-36`}
+          className={cn(selectClassName, 'w-36')}
           value={status}
           onChange={(event) => setStatus(event.target.value as typeof status)}
           aria-label="Show"
@@ -92,10 +93,10 @@ export function DishesTab() {
                   <div className="flex items-center gap-3">
                     {dish.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={dish.imageUrl} alt="" className="size-10 rounded-md object-cover" />
+                      <img src={dish.imageUrl} alt="" className="size-10 rounded-lg object-cover" />
                     ) : (
-                      <span className="flex size-10 items-center justify-center rounded-md bg-muted">
-                        <UtensilsCrossed className="size-4 text-muted-foreground" />
+                      <span className="flex size-10 items-center justify-center rounded-lg bg-accent">
+                        <UtensilsCrossed className="size-4 text-primary/70" />
                       </span>
                     )}
                     <div>

@@ -2,7 +2,7 @@
 
 import { loginSchema, type LoginInput } from '@fernleaf/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, ChefHat, Loader2, MapPinned, ShieldCheck, Truck } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,10 +16,10 @@ import { homeRouteFor, useLogin, useSessionQuery } from '@/lib/session';
 
 /** The four accounts from the assignment, shown only on demo deployments. */
 const DEMO_ACCOUNTS = [
-  { role: 'Admin', email: 'admin@test.com', does: 'Everything' },
-  { role: 'Kitchen', email: 'kitchen@test.com', does: 'Kitchen board' },
-  { role: 'Dispatch', email: 'dispatch@test.com', does: 'Drops and drivers' },
-  { role: 'Driver', email: 'driver@test.com', does: "Today's deliveries" },
+  { role: 'Admin', email: 'admin@test.com', does: 'Everything', icon: ShieldCheck },
+  { role: 'Kitchen', email: 'kitchen@test.com', does: 'Kitchen board', icon: ChefHat },
+  { role: 'Dispatch', email: 'dispatch@test.com', does: 'Drops and drivers', icon: Truck },
+  { role: 'Driver', email: 'driver@test.com', does: "Today's deliveries", icon: MapPinned },
 ];
 const DEMO_PASSWORD = 'Test@1234';
 // Written as process.env.NAME so Next.js can inline it into the browser bundle at build time.
@@ -68,8 +68,10 @@ export function LoginForm() {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Use your Fernleaf staff account.</p>
+      <h2 className="font-display text-3xl font-semibold tracking-tight">Welcome back</h2>
+      <p className="mt-1.5 text-sm text-muted-foreground">
+        Sign in with your Fernleaf staff account.
+      </p>
 
       <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
         <div className="space-y-2">
@@ -106,7 +108,7 @@ export function LoginForm() {
           </Alert>
         ) : null}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}
           Sign in
         </Button>
@@ -114,26 +116,37 @@ export function LoginForm() {
 
       {showDemoAccounts ? (
         <div className="mt-10">
-          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            Demo accounts
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Password for all four:{' '}
-            <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              Demo accounts
+            </p>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            One click signs in. Password for all four:{' '}
+            <code className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-foreground">
               {DEMO_PASSWORD}
             </code>
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
             {DEMO_ACCOUNTS.map((account) => (
               <button
                 key={account.email}
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => signInAs(account.email)}
-                className="rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/50 hover:bg-accent disabled:opacity-50"
+                className="group flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5 text-left shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card disabled:opacity-50"
               >
-                <span className="block text-sm font-medium">{account.role}</span>
-                <span className="block text-xs text-muted-foreground">{account.does}</span>
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <account.icon className="size-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">{account.role}</span>
+                  <span className="block text-xs leading-snug text-muted-foreground">
+                    {account.does}
+                  </span>
+                </span>
               </button>
             ))}
           </div>

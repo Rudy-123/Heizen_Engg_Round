@@ -31,4 +31,4 @@ export function useDishes(search: string, status: 'active' | 'inactive' | 'all')
 
 /** Native <select> styled like our inputs. */
 export const selectClassName =
-  'h-9 w-full rounded-md border border-input bg-card px-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50';
+  'h-9 w-full rounded-lg border border-input bg-card px-2 text-sm shadow-xs outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-primary/15 disabled:opacity-50';

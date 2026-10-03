@@ -1,5 +1,6 @@
 'use client';
 
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Brand } from '@/components/brand';
@@ -22,7 +23,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4" aria-label="Main">
         {groups.map((group) => (
           <div key={group.label}>
-            <p className="px-2 pb-2 text-[11px] font-semibold tracking-wider uppercase opacity-55">
+            <p className="px-3 pb-2 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
               {group.label}
             </p>
             <ul className="space-y-0.5">
@@ -35,13 +36,20 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                       onClick={onNavigate}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-colors',
+                        'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                         active
-                          ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-                          : 'opacity-80 hover:bg-sidebar-accent/60 hover:opacity-100',
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
                       )}
                     >
-                      <item.icon className="size-4 shrink-0" />
+                      <item.icon
+                        className={cn(
+                          'size-[18px] shrink-0 transition-colors',
+                          active
+                            ? 'text-primary'
+                            : 'text-muted-foreground group-hover:text-sidebar-accent-foreground',
+                        )}
+                      />
                       {item.label}
                     </Link>
                   </li>
@@ -52,9 +60,14 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
 
-      <div className="border-t border-sidebar-border px-5 py-4 text-xs">
-        <p className="opacity-60">Signed in as</p>
-        <p className="mt-0.5 font-medium">{user.role.name}</p>
+      <div className="m-3 flex items-center gap-3 rounded-xl border border-sidebar-border bg-background px-3 py-2.5">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+          <ShieldCheck className="size-4" />
+        </span>
+        <div className="text-xs leading-tight">
+          <p className="text-muted-foreground">Signed in as</p>
+          <p className="mt-0.5 font-semibold">{user.role.name}</p>
+        </div>
       </div>
     </div>
   );
