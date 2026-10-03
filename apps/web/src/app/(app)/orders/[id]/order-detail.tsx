@@ -2,6 +2,7 @@
 
 import {
   formatCents,
+  formatInvoiceNumber,
   formatOrderNumber,
   minutesToTime,
   type OrderDetailDto,
@@ -34,15 +35,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, ApiError } from '@/lib/api';
 import { formatInstant, formatIsoDate } from '@/lib/format';
+import { billingKey } from '@/lib/billing-queries';
 import { useKitchenTimeZone } from '@/lib/kitchen-clock';
 import { ordersQueryKey, orderQueryKey, useOrder } from '@/lib/order-queries';
-import { DeliveryDialog, ReasonDialog } from './order-dialogs';
+import { useCan } from '@/lib/session';
+import { CreditDialog, DeliveryDialog, ReasonDialog } from './order-dialogs';
 
 export function OrderDetail({ id }: { id: string }) {
   const order = useOrder(id);
   const zone = useKitchenTimeZone() ?? 'Asia/Kolkata';
   const queryClient = useQueryClient();
-  const [dialog, setDialog] = useState<'cancel' | 'reject' | 'delivery' | null>(null);
+  const [dialog, setDialog] = useState<'cancel' | 'reject' | 'delivery' | 'credit' | null>(null);
+  const canCredit = useCan('BILLING_WRITE');
+  const canSeeBilling = useCan('BILLING_READ');
 
   const saved = (result: OrderDetailDto) => {
     queryClient.setQueryData(orderQueryKey(id), result);
@@ -122,6 +127,11 @@ export function OrderDetail({ id }: { id: string }) {
             {data.allowed.reject ? (
               <Button variant="ghost" onClick={() => setDialog('reject')}>
                 Reject
+              </Button>
+            ) : null}
+            {canCredit && (data.status === 'CONFIRMED' || data.status === 'DELIVERED') ? (
+              <Button variant="ghost" onClick={() => setDialog('credit')}>
+                <Receipt /> Record a credit
               </Button>
             ) : null}
           </>
@@ -263,9 +273,20 @@ export function OrderDetail({ id }: { id: string }) {
                 {time(data.confirmedAt)}
               </Fact>
               <Fact icon={Receipt} label="Invoice">
-                {data.invoice
-                  ? `INV-${String(data.invoice.number).padStart(4, '0')}`
-                  : 'Not invoiced'}
+                {data.invoice ? (
+                  canSeeBilling ? (
+                    <Link
+                      href={`/billing/invoices/${data.invoice.id}`}
+                      className="font-medium text-primary underline"
+                    >
+                      {formatInvoiceNumber(data.invoice.number)}
+                    </Link>
+                  ) : (
+                    formatInvoiceNumber(data.invoice.number)
+                  )
+                ) : (
+                  'Not invoiced'
+                )}
               </Fact>
             </CardContent>
           </Card>
@@ -282,6 +303,16 @@ export function OrderDetail({ id }: { id: string }) {
       ) : null}
       {dialog === 'delivery' ? (
         <DeliveryDialog order={data} onClose={() => setDialog(null)} onSaved={saved} />
+      ) : null}
+      {dialog === 'credit' ? (
+        <CreditDialog
+          order={data}
+          onClose={() => setDialog(null)}
+          onSaved={() => {
+            void queryClient.invalidateQueries({ queryKey: orderQueryKey(id) });
+            void queryClient.invalidateQueries({ queryKey: billingKey });
+          }}
+        />
       ) : null}
     </div>
   );

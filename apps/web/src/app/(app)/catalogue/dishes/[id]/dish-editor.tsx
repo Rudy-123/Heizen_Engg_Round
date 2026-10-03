@@ -72,9 +72,18 @@ export function DishEditor({ id }: { id: string }) {
         }
       />
       <div className="space-y-6">
-        <DishDetailsForm key={data?.updatedAt ?? 'new'} dish={data} reference={reference.data} />
+        {/* Keyed by the last save, so each form starts fresh from what was saved. */}
+        <DishDetailsForm
+          key={`details-${data?.updatedAt ?? 'new'}`}
+          dish={data}
+          reference={reference.data}
+        />
         {data ? (
-          <OptionGroupsEditor key={data.updatedAt} dish={data} reference={reference.data} />
+          <OptionGroupsEditor
+            key={`groups-${data.updatedAt}`}
+            dish={data}
+            reference={reference.data}
+          />
         ) : null}
       </div>
     </div>

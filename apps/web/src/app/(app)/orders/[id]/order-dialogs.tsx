@@ -1,11 +1,18 @@
 'use client';
 
-import { minutesToTime, type OrderDetailDto } from '@fernleaf/shared';
+import {
+  formatCents,
+  minutesToTime,
+  type CreateCreditInput,
+  type CreditDto,
+  type OrderDetailDto,
+} from '@fernleaf/shared';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FieldError } from '@/components/field-error';
+import { MoneyInput } from '@/components/money-input';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -195,6 +202,96 @@ export function DeliveryDialog({
           <Button onClick={() => save.mutate()} disabled={save.isPending || !context.data}>
             {save.isPending ? <Loader2 className="animate-spin" /> : null}
             Save delivery
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * A credit for a confirmed order that turned out wrong, e.g. a short delivery. The order's
+ * price never changes; the credit goes on the company's next invoice (README: billing policy).
+ */
+export function CreditDialog({
+  order,
+  onClose,
+  onSaved,
+}: {
+  order: OrderDetailDto;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [amountCents, setAmountCents] = useState<number | null>(null);
+  const [reason, setReason] = useState<CreateCreditInput['reason']>('SHORT_DELIVERY');
+  const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const save = useMutation({
+    mutationFn: () =>
+      api.post<CreditDto>('/billing/credits', {
+        orderId: order.id,
+        amountCents: amountCents ?? 0,
+        reason,
+        note,
+      } satisfies CreateCreditInput),
+    onSuccess: (credit) => {
+      toast.success(`Credit of ${formatCents(-credit.amountCents)} recorded for the next invoice`);
+      onSaved();
+      onClose();
+    },
+    onError: (e) =>
+      setError(
+        e instanceof ApiError ? (e.fieldErrors[0]?.message ?? e.message) : 'Could not save.',
+      ),
+  });
+
+  return (
+    <Dialog open onOpenChange={(open) => (open ? null : onClose())}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Record a credit</DialogTitle>
+          <DialogDescription>
+            For an order that turned out wrong after confirmation, e.g. meals missing at delivery.
+            The order total ({formatCents(order.totalCents)}) stays as it was; the credit goes on{' '}
+            {order.company.name}’s next invoice.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="credit-amount">Amount</Label>
+            <MoneyInput id="credit-amount" value={amountCents} onChange={setAmountCents} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="credit-reason">Reason</Label>
+            <select
+              id="credit-reason"
+              className={selectClassName}
+              value={reason}
+              onChange={(e) => setReason(e.target.value as CreateCreditInput['reason'])}
+            >
+              <option value="SHORT_DELIVERY">Short delivery</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="credit-note">What happened</Label>
+            <Textarea
+              id="credit-note"
+              rows={2}
+              placeholder="e.g. 2 thalis missing"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+          <FieldError message={error ?? undefined} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending || !amountCents}>
+            {save.isPending ? <Loader2 className="animate-spin" /> : null}
+            Record credit
           </Button>
         </DialogFooter>
       </DialogContent>
