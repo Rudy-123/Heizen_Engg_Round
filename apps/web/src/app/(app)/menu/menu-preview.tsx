@@ -9,6 +9,7 @@ import {
 } from '@fernleaf/shared';
 import { EyeOff, Flame, Lock, Snowflake, TriangleAlert, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
+import { PhotoZoom } from '@/components/dish-photo';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -199,8 +200,29 @@ function DishCard({ dish }: { dish: MenuDishDto }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border bg-card shadow-card">
       {dish.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={dish.imageUrl} alt="" className="h-36 w-full object-cover" />
+        <PhotoZoom
+          url={dish.imageUrl}
+          name={dish.name}
+          subtitle={formatCents(dish.priceCents)}
+          details={
+            <>
+              {dish.description ? <p>{dish.description}</p> : null}
+              {dish.dietaryTags.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {dish.dietaryTags.map((tag) => (
+                    <Badge key={tag.id} variant="success">
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+            </>
+          }
+          className="h-36 w-full"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={dish.imageUrl} alt="" className="size-full object-cover" />
+        </PhotoZoom>
       ) : (
         <div className="flex h-24 items-center justify-center bg-[linear-gradient(135deg,oklch(0.95_0.03_80),oklch(0.92_0.04_60))]">
           <UtensilsCrossed className="size-6 text-terracotta" />

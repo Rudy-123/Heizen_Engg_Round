@@ -18,7 +18,7 @@ import { DISHES, OPTIONS, REFERENCE_LISTS } from './demo-catalogue.js';
  *
  * Safe to run any number of times: every step only creates what is missing (matched by
  * name, SKU or email) and never changes or deletes what is already there, so edits made in
- * the app survive a re-run.
+ * the app survive a re-run. The one fill-in: a demo dish with no photo gets its photo.
  */
 export async function seedMasterData(prisma: PrismaClient): Promise<void> {
   const ref = await seedReferenceLists(prisma);
@@ -47,6 +47,14 @@ interface ReferenceIds {
   stations: Ids;
   sizes: Ids;
   packaging: Ids;
+}
+
+/**
+ * Demo dish photos ship with the web app (apps/web/public/dishes/<sku>.jpg): real photos from
+ * Wikimedia Commons, credited in CREDITS.md in that folder.
+ */
+function dishPhoto(sku: string): string {
+  return `/dishes/${sku.toLowerCase()}.jpg`;
 }
 
 function idOf(ids: Ids, key: string): string {
@@ -152,6 +160,7 @@ async function seedDishes(prisma: PrismaClient, ref: ReferenceIds, optionIds: Id
           costCents: dish.costCents,
           kitchenStationId: dish.station ? idOf(ref.stations, dish.station) : null,
           minOrderQuantity: dish.minOrderQuantity ?? null,
+          imageUrl: dishPhoto(dish.sku),
           isActive: dish.isActive ?? true,
           allergens: {
             create: (dish.allergens ?? []).map((name) => ({
@@ -165,6 +174,11 @@ async function seedDishes(prisma: PrismaClient, ref: ReferenceIds, optionIds: Id
         include: { _count: { select: { optionGroups: true } } },
       }));
     ids.set(dish.sku, row.id);
+
+    // Demo dishes created before the photos existed get one - a photo set in the app stays.
+    if (existing && !existing.imageUrl) {
+      await prisma.dish.update({ where: { id: row.id }, data: { imageUrl: dishPhoto(dish.sku) } });
+    }
 
     // Option groups only for a dish that has none yet (staff may have changed them since).
     if (row._count.optionGroups === 0) {

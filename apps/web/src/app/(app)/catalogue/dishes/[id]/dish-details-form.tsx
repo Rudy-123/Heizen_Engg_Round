@@ -9,8 +9,9 @@ import {
 } from '@fernleaf/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Flame, Loader2, Snowflake } from 'lucide-react';
+import { Flame, ImageOff, Loader2, Snowflake } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
@@ -64,6 +65,8 @@ export function DishDetailsForm({
   });
   const { errors, isDirty, isSubmitting } = form.formState;
   const imageUrl = form.watch('imageUrl');
+  // The address whose photo failed to load, so the preview can say so instead of a broken image.
+  const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: (input: DishInput) =>
@@ -127,26 +130,38 @@ export function DishDetailsForm({
               <FieldError message={errors.description?.message} />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="dish-image">Image URL</Label>
-              <div className="flex items-start gap-3">
-                {imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={imageUrl}
-                    alt=""
-                    className="size-16 shrink-0 rounded-lg border object-cover"
-                  />
-                ) : null}
-                <div className="flex-1 space-y-2">
-                  <Input
-                    id="dish-image"
-                    placeholder="https://…"
-                    aria-invalid={errors.imageUrl ? true : undefined}
-                    {...form.register('imageUrl')}
-                  />
-                  <FieldError message={errors.imageUrl?.message} />
+            <div className="grid gap-4 md:col-span-2 md:grid-cols-[minmax(0,18rem)_1fr]">
+              {/* The photo as employees see it on the menu and the order form. */}
+              {imageUrl && brokenUrl !== imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageUrl}
+                  alt={`Photo of ${form.watch('name') || 'the dish'}`}
+                  onError={() => setBrokenUrl(imageUrl)}
+                  className="aspect-[4/3] w-full rounded-xl border object-cover shadow-card"
+                />
+              ) : (
+                <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+                  <ImageOff className="size-6" />
+                  {imageUrl
+                    ? 'This photo couldn’t be loaded - check the address.'
+                    : 'No photo yet - menus show a plain tile instead.'}
                 </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="dish-image">Photo</Label>
+                <p className="text-sm text-muted-foreground">
+                  Shown on the menu and the order form. Paste a link to a photo (https://…), or use
+                  one stored with the app (/dishes/…).
+                </p>
+                <Input
+                  id="dish-image"
+                  placeholder="https://… or /dishes/…"
+                  className="text-muted-foreground"
+                  aria-invalid={errors.imageUrl ? true : undefined}
+                  {...form.register('imageUrl')}
+                />
+                <FieldError message={errors.imageUrl?.message} />
               </div>
             </div>
 

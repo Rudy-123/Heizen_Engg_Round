@@ -105,4 +105,25 @@ describe('Demo master data (seed)', () => {
       (await prisma.company.findUniqueOrThrow({ where: { id: zephyr.id } })).deliveryLeadMinutes,
     ).toBe(75);
   });
+
+  it('gives every demo dish its photo, fills a missing one, and never replaces one set in the app', async () => {
+    expect(await prisma.dish.count({ where: { imageUrl: null } })).toBe(0);
+    const dosa = await prisma.dish.findUniqueOrThrow({ where: { sku: 'FL-BFT-01' } });
+    expect(dosa.imageUrl).toBe('/dishes/fl-bft-01.jpg');
+
+    const idli = await prisma.dish.findUniqueOrThrow({ where: { sku: 'FL-BFT-02' } });
+    await prisma.dish.update({ where: { id: dosa.id }, data: { imageUrl: null } });
+    await prisma.dish.update({
+      where: { id: idli.id },
+      data: { imageUrl: 'https://example.com/our-own-idli.jpg' },
+    });
+    await seedMasterData(prisma);
+
+    expect((await prisma.dish.findUniqueOrThrow({ where: { id: dosa.id } })).imageUrl).toBe(
+      '/dishes/fl-bft-01.jpg',
+    );
+    expect((await prisma.dish.findUniqueOrThrow({ where: { id: idli.id } })).imageUrl).toBe(
+      'https://example.com/our-own-idli.jpg',
+    );
+  });
 });

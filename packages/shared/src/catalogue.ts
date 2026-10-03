@@ -103,8 +103,15 @@ export const dishInputSchema = z.object({
     .regex(/^[A-Z0-9-]{2,20}$/, { message: 'Use 2–20 letters, digits or dashes.' }),
   name: z.string().trim().min(1, { message: 'Enter a name.' }).max(80),
   description: z.string().trim().max(500).default(''),
+  /** A full URL, or a file served by the web app itself (e.g. the demo photos in /dishes/). */
   imageUrl: z
-    .union([z.literal(''), z.url({ message: 'Enter a full image URL (https://…).' })])
+    .union([
+      z.literal(''),
+      z.url({ message: 'Enter a full image URL (https://…) or a path like /dishes/photo.jpg.' }),
+      z.string().regex(/^\/[A-Za-z0-9._\-/]+\.(jpe?g|png|webp)$/, {
+        message: 'Enter a full image URL (https://…) or a path like /dishes/photo.jpg.',
+      }),
+    ])
     .nullable()
     .transform((value) => value || null),
   temperature: z.enum(TEMPERATURES),

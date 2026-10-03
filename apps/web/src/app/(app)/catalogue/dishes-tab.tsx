@@ -1,10 +1,11 @@
 'use client';
 
 import { formatCents } from '@fernleaf/shared';
-import { Flame, Plus, Search, Snowflake, UtensilsCrossed } from 'lucide-react';
+import { Flame, Plus, Search, Snowflake } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDeferredValue, useState } from 'react';
+import { DishPhoto } from '@/components/dish-photo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -91,14 +92,7 @@ export function DishesTab() {
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    {dish.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={dish.imageUrl} alt="" className="size-10 rounded-lg object-cover" />
-                    ) : (
-                      <span className="flex size-10 items-center justify-center rounded-lg bg-accent">
-                        <UtensilsCrossed className="size-4 text-primary/70" />
-                      </span>
-                    )}
+                    <DishPhoto url={dish.imageUrl} name={dish.name} className="size-10" />
                     <div>
                       <Link
                         href={`/catalogue/dishes/${dish.id}`}

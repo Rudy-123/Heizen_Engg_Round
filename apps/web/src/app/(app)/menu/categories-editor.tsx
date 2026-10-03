@@ -2,9 +2,10 @@
 
 import type { MenuCategoryDto } from '@fernleaf/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Lock, Pencil, Plus, UtensilsCrossed, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Lock, Pencil, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { DishPhoto } from '@/components/dish-photo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -200,14 +201,7 @@ function CategoryCard({
                 key={item.id}
                 className={cn('flex items-center gap-3 px-4 py-2', !item.isActive && 'opacity-60')}
               >
-                {item.dish.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.dish.imageUrl} alt="" className="size-9 rounded-lg object-cover" />
-                ) : (
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-accent">
-                    <UtensilsCrossed className="size-4 text-primary/70" />
-                  </span>
-                )}
+                <DishPhoto url={item.dish.imageUrl} name={item.dish.name} className="size-9" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{item.dish.name}</p>
                   <p className="font-mono text-xs text-muted-foreground">{item.dish.sku}</p>

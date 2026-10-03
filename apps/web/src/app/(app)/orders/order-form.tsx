@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { DishPhoto } from '@/components/dish-photo';
 import { api, ApiError } from '@/lib/api';
 import { selectClassName } from '@/lib/catalogue-queries';
 import { useCompanies, useEmployees } from '@/lib/company-queries';
@@ -471,6 +472,13 @@ function OrderBuilder({
                         key={`${section.categoryId}-${dish.dishId}`}
                         className="flex items-center gap-3 text-sm"
                       >
+                        <DishPhoto
+                          url={dish.imageUrl}
+                          name={dish.name}
+                          subtitle={formatCents(dish.priceCents)}
+                          details={dish.description ? <p>{dish.description}</p> : null}
+                          className="size-11"
+                        />
                         <span className="min-w-0 flex-1">
                           <span className="font-medium">{dish.name}</span>
                           {dish.allergyWarnings.length > 0 ? (

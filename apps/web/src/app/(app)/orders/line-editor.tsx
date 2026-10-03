@@ -8,6 +8,7 @@ import {
   type QuoteLineDto,
 } from '@fernleaf/shared';
 import { Lock, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
+import { DishPhoto } from '@/components/dish-photo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,6 +112,13 @@ export function LineEditor({
   return (
     <div className="rounded-xl border bg-card p-4 shadow-xs">
       <div className="flex flex-wrap items-center gap-3">
+        <DishPhoto
+          url={dish.imageUrl}
+          name={dish.name}
+          subtitle={`${formatCents(dish.priceCents)} each before choices`}
+          details={dish.description ? <p>{dish.description}</p> : null}
+          className="size-12"
+        />
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{dish.name}</p>
           <p className="text-xs text-muted-foreground">
