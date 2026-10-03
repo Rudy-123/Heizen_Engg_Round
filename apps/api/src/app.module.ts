@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module.js';
+import { BillingModule } from './billing/billing.module.js';
 import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { CommonModule } from './common/common.module.js';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
 import { validateEnv } from './config/env.js';
 import { CompaniesModule } from './companies/companies.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 import { DispatchModule } from './dispatch/dispatch.module.js';
 import { HealthModule } from './health/health.module.js';
 import { KitchenModule } from './kitchen/kitchen.module.js';
@@ -40,6 +42,8 @@ import { StaffModule } from './staff/staff.module.js';
     OrdersModule,
     KitchenModule,
     DispatchModule,
+    BillingModule,
+    DashboardModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

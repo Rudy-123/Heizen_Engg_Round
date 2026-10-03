@@ -340,7 +340,10 @@ function toKitchenOrder(order: BoardOrder, now: Date, atRiskMinutes: number): Ki
         stationId: line.dish.kitchenStationId,
         quantity: unit.quantity,
         choices: unit.options.map(choiceLabel),
-        allergyConflicts: conflicts(line.dish.allergens, unit, allergies),
+        allergens: allergensOf(line.dish.allergens, unit).map((a) => a.name),
+        allergyConflicts: allergensOf(line.dish.allergens, unit)
+          .filter((a) => allergies.has(a.id))
+          .map((a) => a.name),
         startedAt: iso(unit.kitchenStartedAt),
         startedByName: unit.kitchenStartedBy?.name ?? null,
         doneAt: iso(unit.kitchenDoneAt),
@@ -358,20 +361,19 @@ function describeChoices(options: { optionName: string; portionName: string | nu
   return options.length > 0 ? ` (${options.map(choiceLabel).join(', ')})` : '';
 }
 
-/** Allergens in the dish or the chosen options that the employee is allergic to. */
-function conflicts(
+/** Every allergen in the unit: the dish's and its chosen options', once each, by name. */
+function allergensOf(
   dishAllergens: { allergen: { id: string; name: string } }[],
   unit: Unit,
-  allergies: Set<string>,
-): string[] {
-  const names = new Set<string>();
+): { id: string; name: string }[] {
+  const byId = new Map<string, { id: string; name: string }>();
   for (const { allergen } of [
     ...dishAllergens,
     ...unit.options.flatMap((option) => option.option.allergens),
   ]) {
-    if (allergies.has(allergen.id)) names.add(allergen.name);
+    byId.set(allergen.id, allergen);
   }
-  return [...names].sort();
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function summarise(

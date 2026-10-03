@@ -62,7 +62,11 @@ const detailInclude = {
       combinations: { orderBy: { id: 'asc' }, include: { options: { orderBy: { id: 'asc' } } } },
     },
   },
-  events: { orderBy: { createdAt: 'asc' }, include: { actor: { select: { name: true } } } },
+  // Events written in one go share a timestamp; the id (created in order) breaks the tie.
+  events: {
+    orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    include: { actor: { select: { name: true } } },
+  },
 } satisfies Prisma.OrderInclude;
 
 type OrderWithDetails = Prisma.OrderGetPayload<{ include: typeof detailInclude }>;
@@ -719,12 +723,18 @@ export class OrdersService {
           },
         },
       });
-      if (order.invoiceId) {
+      // Credit whatever isn't credited already (e.g. after a short-delivery credit).
+      const credited = await tx.billingAdjustment.aggregate({
+        where: { orderId: id },
+        _sum: { amountCents: true },
+      });
+      const owed = order.totalCents + (credited._sum.amountCents ?? 0);
+      if (order.invoiceId && owed > 0) {
         await tx.billingAdjustment.create({
           data: {
             companyId: order.companyId,
             orderId: id,
-            amountCents: -order.totalCents,
+            amountCents: -owed,
             reason: cancelling ? 'CANCELLED_AFTER_INVOICE' : 'REJECTED_AFTER_INVOICE',
             note: reason,
             createdById: actor.id,
@@ -735,7 +745,7 @@ export class OrdersService {
             orderId: id,
             type: 'CREDITED',
             actorId: actor.id,
-            message: `The order was already invoiced: a credit of ${formatCents(order.totalCents)} goes on the company’s next invoice.`,
+            message: `The order was already invoiced: a credit of ${formatCents(owed)} goes on the company’s next invoice.`,
           },
         });
       }

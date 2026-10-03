@@ -1,4 +1,5 @@
 import type {
+  AdminDashboardDto,
   DishDetailDto,
   DispatchBoardDto,
   DriverDayDto,
@@ -515,6 +516,39 @@ describe('Kitchen, dispatch and delivery (e2e)', () => {
       expect(delivered).toMatchObject({ stage: 'DELIVERED', deliveredOnTime: false });
       const day = (await driver.get('/api/driver/today').expect(200)).body as DriverDayDto;
       expect(day.drops[0]?.stage).toBe('DELIVERED');
+    });
+  });
+
+  describe('admin dashboard', () => {
+    it('sums the day from the same orders and drops the boards show', async () => {
+      const { body } = await admin.get('/api/dashboard/admin').expect(200);
+      const dashboard = body as AdminDashboardDto;
+      expect(dashboard.date).toBe(WEDNESDAY);
+      // Kai 4 + Kim 2 + Kim later 2 + the late order 1 - all delivered.
+      expect(dashboard.today).toMatchObject({
+        orders: 4,
+        meals: 9,
+        mealsDelivered: 9,
+        dropsTotal: 2,
+        dropsDelivered: 2,
+        dropsOnTime: 1,
+        kitchenLate: 0,
+        dropsLate: 0,
+        placedWaiting: 0,
+      });
+      expect(dashboard.week[0]).toMatchObject({ date: WEDNESDAY, confirmedMeals: 9 });
+      // It's Wednesday 13:41: the next lock is Friday's delivery, today at 16:00.
+      expect(dashboard.nextCutoff).toMatchObject({
+        deliveryDate: '2027-04-09',
+        cutoffAt: ist(WEDNESDAY, '16:00').toISOString(),
+      });
+      expect(dashboard.billing).not.toBeNull();
+      expect(dashboard.dataHealth).not.toBeNull();
+    });
+
+    it('is only for people who can read orders', async () => {
+      await kitchen.get('/api/dashboard/admin').expect(403);
+      await driver.get('/api/dashboard/admin').expect(403);
     });
   });
 });

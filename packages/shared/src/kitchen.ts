@@ -26,6 +26,8 @@ export interface KitchenUnitDto {
   quantity: number;
   /** e.g. ["Paneer", "Brown rice (Large)"] */
   choices: string[];
+  /** Every allergen in this unit (the dish's and the chosen options'). */
+  allergens: string[];
   /** Allergens in this unit that the employee has recorded as allergies. */
   allergyConflicts: string[];
   startedAt: string | null;
