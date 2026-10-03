@@ -6,4 +6,5 @@ coverage
 package-lock.json
 **/migrations/**
 **/generated/**
+next-env.d.ts
 *.pdf
