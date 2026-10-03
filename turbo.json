@@ -8,6 +8,7 @@
     },
     "build": {
       "dependsOn": ["^build", "db:generate"],
+      "env": ["API_ORIGIN", "NEXT_PUBLIC_*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "dev": {
