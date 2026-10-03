@@ -33,7 +33,10 @@ describe('Staff and roles (e2e)', () => {
   });
 
   it('lists the roles with their permissions - admins are not drivers', () => {
-    expect(roles.map((r) => r.key).sort()).toEqual(['admin', 'dispatch', 'driver', 'kitchen']);
+    // The four roles from the spec (other e2e files may add roles of their own - roles are data).
+    expect(roles.map((r) => r.key)).toEqual(
+      expect.arrayContaining(['admin', 'dispatch', 'driver', 'kitchen']),
+    );
     const adminRole = roles.find((r) => r.key === 'admin');
     expect(adminRole?.permissions).toContain('STAFF_MANAGE');
     expect(adminRole?.permissions).not.toContain('DELIVERIES_OWN');

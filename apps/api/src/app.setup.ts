@@ -13,6 +13,8 @@ export function configureApp(app: NestExpressApplication): void {
   // so secure cookies and client IPs work correctly.
   app.set('trust proxy', 1);
   app.use(helmet());
+  // Delivery photos arrive as base64 JSON (shrunk in the browser first), so allow ~2 MB bodies.
+  app.useBodyParser('json', { limit: '2mb' });
   // Reads the session cookie into request.cookies.
   app.use(cookieParser());
   app.enableShutdownHooks();

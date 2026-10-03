@@ -209,8 +209,9 @@ export class MenuService {
   /**
    * The menu exactly as this employee would see it (spec 4.2): their company's hiding and
    * price tier (or the default tier) applied. The order form uses the same function.
+   * `tierId` prices it on a given tier instead - an edited placed order keeps its own tier.
    */
-  async menuForEmployee(employeeId: string): Promise<EmployeeMenu> {
+  async menuForEmployee(employeeId: string, tierId?: string): Promise<EmployeeMenu> {
     const employee = await this.prisma.employee.findUnique({
       where: { id: employeeId },
       include: {
@@ -229,8 +230,8 @@ export class MenuService {
         'Set up a price tier first - without one, no dish has a price.',
       );
     }
-    const tierId = tierForCompany(employee.company.priceTierId, defaultTier.id);
-    const tier = tiers.find((candidate) => candidate.id === tierId) ?? defaultTier;
+    const pricedOn = tierId ?? tierForCompany(employee.company.priceTierId, defaultTier.id);
+    const tier = tiers.find((candidate) => candidate.id === pricedOn) ?? defaultTier;
 
     const categories = await this.prisma.menuCategory.findMany({
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],

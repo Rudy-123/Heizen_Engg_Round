@@ -7,8 +7,11 @@ import { CommonModule } from './common/common.module.js';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
 import { validateEnv } from './config/env.js';
 import { CompaniesModule } from './companies/companies.module.js';
+import { DispatchModule } from './dispatch/dispatch.module.js';
 import { HealthModule } from './health/health.module.js';
+import { KitchenModule } from './kitchen/kitchen.module.js';
 import { MenuModule } from './menu/menu.module.js';
+import { OrdersModule } from './orders/orders.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { SettingsModule } from './settings/settings.module.js';
@@ -34,6 +37,9 @@ import { StaffModule } from './staff/staff.module.js';
     CompaniesModule,
     MenuModule,
     StaffModule,
+    OrdersModule,
+    KitchenModule,
+    DispatchModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
