@@ -1,24 +1,19 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from '../src/app.module.js';
-import { configureApp } from '../src/app.setup.js';
+import { createTestApp } from './support/create-test-app.js';
 
 describe('API basics (e2e)', () => {
   let app: NestExpressApplication;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication<NestExpressApplication>();
-    configureApp(app);
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('GET /api/health reports ok and the kitchen time zone', async () => {
+  it('GET /api/health reports ok and the kitchen time zone, without signing in', async () => {
     const response = await request(app.getHttpServer()).get('/api/health').expect(200);
     expect(response.body).toMatchObject({
       status: 'ok',
@@ -39,7 +34,7 @@ describe('API basics (e2e)', () => {
 
   it('a malformed JSON body returns 400 MALFORMED_REQUEST', async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/health')
+      .post('/api/auth/login')
       .set('Content-Type', 'application/json')
       .send('{"broken": ')
       .expect(400);

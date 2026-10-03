@@ -1,8 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
+import type { HealthResponse } from '@fernleaf/shared';
+import { Public } from '../auth/access.decorators.js';
 import { ClockService } from '../common/clock/clock.service.js';
 import { DomainError } from '../common/errors/domain-error.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(
@@ -16,7 +19,7 @@ export class HealthController {
    * It also shows the kitchen's "today", which makes time-zone problems easy to spot after a deploy.
    */
   @Get()
-  check() {
+  check(): HealthResponse {
     return {
       status: 'ok',
       time: this.clock.now().toISOString(),

@@ -1,4 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 /**
@@ -12,5 +13,7 @@ export function configureApp(app: NestExpressApplication): void {
   // so secure cookies and client IPs work correctly.
   app.set('trust proxy', 1);
   app.use(helmet());
+  // Reads the session cookie into request.cookies.
+  app.use(cookieParser());
   app.enableShutdownHooks();
 }

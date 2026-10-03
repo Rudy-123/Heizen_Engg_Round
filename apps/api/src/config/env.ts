@@ -12,6 +12,10 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .regex(/^postgres(ql)?:\/\//, { message: 'must be a postgresql:// connection string' }),
+  /** Signs the session token. Long and random; different in every environment. */
+  JWT_SECRET: z.string().min(32, { message: 'must be at least 32 characters long' }),
+  /** How long a sign-in lasts. 12 h covers a kitchen shift. */
+  SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(72).default(12),
   KITCHEN_TIME_ZONE: z
     .string()
     .default('Asia/Kolkata')

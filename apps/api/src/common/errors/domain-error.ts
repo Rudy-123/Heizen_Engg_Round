@@ -23,6 +23,23 @@ export class ValidationFailedError extends DomainError {
   }
 }
 
+/** 401 - not signed in, or the session is no longer valid. */
+export class UnauthenticatedError extends DomainError {
+  constructor(message = 'Please sign in.') {
+    super(401, ErrorCode.Unauthenticated, message);
+  }
+}
+
+/** 403 - signed in, but this person's role doesn't allow the action. */
+export class ForbiddenError extends DomainError {
+  constructor(
+    message = "Your role doesn't allow this action.",
+    code: string = ErrorCode.Forbidden,
+  ) {
+    super(403, code, message);
+  }
+}
+
 /** 404 - the thing asked for doesn't exist (or the caller isn't allowed to know it exists). */
 export class NotFoundError extends DomainError {
   constructor(what: string) {
