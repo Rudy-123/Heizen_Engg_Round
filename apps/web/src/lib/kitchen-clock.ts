@@ -15,6 +15,16 @@ export function useKitchenTimeZone(): string | undefined {
   return data?.kitchen.timeZone;
 }
 
+/** Today's date in the kitchen (YYYY-MM-DD), as the server sees it - never the browser's date. */
+export function useKitchenToday(): string | undefined {
+  const { data } = useQuery({
+    queryKey: ['health', 'today'],
+    queryFn: () => api.get<HealthResponse>('/health'),
+    staleTime: 60_000,
+  });
+  return data?.kitchen.today;
+}
+
 /**
  * Current kitchen date and time for the header, e.g. "Sat 3 Oct, 11:52 IST".
  * Formatted in the kitchen's zone, so a reviewer abroad still sees the kitchen's day.
