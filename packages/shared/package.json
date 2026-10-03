@@ -1,0 +1,18 @@
+{
+  "name": "@fernleaf/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Types, schemas and constants shared by the web app and the API",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

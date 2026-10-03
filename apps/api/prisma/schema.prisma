@@ -1,0 +1,95 @@
+// Fernleaf Kitchen - data model.
+//
+// Conventions used throughout:
+// - ids are cuid strings
+// - money is integer cents (never floats); multipliers are integer basis points
+// - instants are timestamptz; delivery dates are plain dates in the kitchen's time zone
+// - things referenced by history are deactivated (isActive), never hard-deleted
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Identity and access
+// ---------------------------------------------------------------------------
+
+/// What a role is allowed to do. Code checks these - never role names - so a new
+/// role is just a new Role row with a set of permissions.
+enum Permission {
+  STAFF_MANAGE
+  SETTINGS_READ
+  SETTINGS_WRITE
+  CATALOGUE_READ
+  CATALOGUE_WRITE
+  MENU_READ
+  MENU_WRITE
+  PRICING_READ
+  PRICING_WRITE
+  COMPANIES_READ
+  COMPANIES_WRITE
+  EMPLOYEES_READ
+  EMPLOYEES_WRITE
+  ORDERS_READ
+  ORDERS_WRITE
+  ORDERS_OVERRIDE
+  CUTOFF_RUN
+  KITCHEN_READ
+  KITCHEN_WORK
+  KITCHEN_FORCE_COMPLETE
+  DISPATCH_READ
+  DISPATCH_MANAGE
+  DELIVERIES_OWN
+  DELIVERIES_ANY
+  BILLING_READ
+  BILLING_WRITE
+}
+
+/// Which dashboard a role lands on after signing in.
+enum Dashboard {
+  ADMIN
+  KITCHEN
+  DISPATCH
+  DRIVER
+}
+
+model Role {
+  id            String       @id @default(cuid())
+  /// Stable identifier used by seeds, e.g. "kitchen". Never used for access checks.
+  key           String       @unique
+  name          String
+  description   String?
+  permissions   Permission[]
+  homeDashboard Dashboard
+  users         User[]
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(3)
+}
+
+/// A member of the kitchen's staff who signs in to the panel.
+/// (Customers are Employees of a Company - a separate model; they never sign in.)
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  /// Always stored lower-case.
+  email        String   @unique
+  /// bcrypt hash. Null means the account cannot sign in (e.g. the demo simulator).
+  passwordHash String?
+  phone        String?
+  isActive     Boolean  @default(true)
+  /// Every staff member has exactly one role.
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id])
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([roleId])
+}
