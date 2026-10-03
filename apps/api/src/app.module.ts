@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module.js';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
 import { validateEnv } from './config/env.js';
 import { HealthModule } from './health/health.module.js';
+import { PricingModule } from './pricing/pricing.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { SettingsModule } from './settings/settings.module.js';
 
@@ -26,6 +27,7 @@ import { SettingsModule } from './settings/settings.module.js';
     HealthModule,
     SettingsModule,
     CatalogueModule,
+    PricingModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

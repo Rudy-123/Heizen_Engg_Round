@@ -1,4 +1,11 @@
-import { centsToDollarString, dollarStringToCents, formatCents } from '@fernleaf/shared';
+import {
+  bpsToMultiplierString,
+  bpsToPercentChange,
+  centsToDollarString,
+  dollarStringToCents,
+  formatCents,
+  multiplierStringToBps,
+} from '@fernleaf/shared';
 
 describe('money helpers (integer cents, no floating point)', () => {
   it('parses what people type into exact cents', () => {
@@ -15,6 +22,24 @@ describe('money helpers (integer cents, no floating point)', () => {
     for (const bad of ['', 'abc', '4.255', '-1', '1,000', '4.']) {
       expect(dollarStringToCents(bad)).toBeNull();
     }
+  });
+
+  it('parses and formats multipliers as exact basis points', () => {
+    expect(multiplierStringToBps('2.4')).toBe(24_000);
+    expect(multiplierStringToBps('1.15')).toBe(11_500);
+    expect(multiplierStringToBps('x2')).toBe(20_000);
+    expect(multiplierStringToBps('0.9999')).toBe(9_999);
+    for (const bad of ['', '1.23456', '-1', '1,5', 'abc']) {
+      expect(multiplierStringToBps(bad)).toBeNull();
+    }
+    expect(bpsToMultiplierString(24_000)).toBe('2.4');
+    expect(bpsToMultiplierString(11_500)).toBe('1.15');
+    expect(bpsToMultiplierString(10_000)).toBe('1');
+    expect(bpsToMultiplierString(9_999)).toBe('0.9999');
+    expect(bpsToPercentChange(11_500)).toBe('+15%');
+    expect(bpsToPercentChange(9_000)).toBe('-10%');
+    expect(bpsToPercentChange(10_050)).toBe('+0.5%');
+    expect(bpsToPercentChange(24_000)).toBe('+140%');
   });
 
   it('formats cents for inputs and for display', () => {
