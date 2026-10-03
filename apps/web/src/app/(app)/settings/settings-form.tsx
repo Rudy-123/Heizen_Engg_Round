@@ -1,10 +1,7 @@
 'use client';
 
 import {
-  minutesToTime,
-  timeToMinutes,
   updateSettingsSchema,
-  WEEKDAYS,
   type PlatformSettingsDto,
   type UpdateSettingsInput,
 } from '@fernleaf/shared';
@@ -15,6 +12,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 import { FieldError } from '@/components/field-error';
+import { TimeInput } from '@/components/time-input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,10 +20,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { WeekdayPicker } from '@/components/weekday-picker';
 import { api } from '@/lib/api';
 import { formatInstant } from '@/lib/format';
 import { applyServerErrors } from '@/lib/form-errors';
-import { cn } from '@/lib/utils';
 import { cutoffPreviewQueryKey } from './cutoff-preview-card';
 
 type FormInput = z.input<typeof updateSettingsSchema>;
@@ -38,30 +36,6 @@ function toFormValues(settings: PlatformSettingsDto): FormInput {
     ...values
   } = settings;
   return values;
-}
-
-/** An <input type="time"> bound to a "minutes since midnight" number. */
-function TimeInput({
-  id,
-  value,
-  onChange,
-  invalid,
-}: {
-  id: string;
-  value: number;
-  onChange: (minutes: number) => void;
-  invalid: boolean;
-}) {
-  return (
-    <Input
-      id={id}
-      type="time"
-      className="w-32"
-      value={Number.isFinite(value) ? minutesToTime(value) : ''}
-      onChange={(event) => onChange(timeToMinutes(event.target.value) ?? Number.NaN)}
-      aria-invalid={invalid || undefined}
-    />
-  );
 }
 
 export function SettingsForm({
@@ -116,37 +90,11 @@ export function SettingsForm({
                 control={form.control}
                 name="kitchenWorkingDays"
                 render={({ field }) => (
-                  <div
-                    className="flex flex-wrap gap-2"
-                    role="group"
-                    aria-label="Kitchen working days"
-                  >
-                    {WEEKDAYS.map((day) => {
-                      const selected = field.value.includes(day.iso);
-                      return (
-                        <button
-                          key={day.iso}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() =>
-                            field.onChange(
-                              selected
-                                ? field.value.filter((d) => d !== day.iso)
-                                : [...field.value, day.iso],
-                            )
-                          }
-                          className={cn(
-                            'h-9 w-14 rounded-md border text-sm font-medium transition-colors disabled:opacity-50',
-                            selected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'bg-card text-muted-foreground hover:bg-accent',
-                          )}
-                        >
-                          {day.short}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <WeekdayPicker
+                    label="Kitchen working days"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 )}
               />
               <FieldError message={errors.kitchenWorkingDays?.message} />

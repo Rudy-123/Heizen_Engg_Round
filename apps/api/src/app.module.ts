@@ -6,7 +6,9 @@ import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { CommonModule } from './common/common.module.js';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
 import { validateEnv } from './config/env.js';
+import { CompaniesModule } from './companies/companies.module.js';
 import { HealthModule } from './health/health.module.js';
+import { MenuModule } from './menu/menu.module.js';
 import { PricingModule } from './pricing/pricing.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { SettingsModule } from './settings/settings.module.js';
@@ -28,6 +30,8 @@ import { SettingsModule } from './settings/settings.module.js';
     SettingsModule,
     CatalogueModule,
     PricingModule,
+    CompaniesModule,
+    MenuModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

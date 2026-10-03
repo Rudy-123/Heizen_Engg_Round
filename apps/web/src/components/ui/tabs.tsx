@@ -10,7 +10,7 @@ export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrim
   return (
     <TabsPrimitive.List
       className={cn(
-        'inline-flex h-10 items-center gap-1 rounded-xl bg-secondary p-1 text-muted-foreground',
+        'inline-flex min-h-10 max-w-full flex-wrap items-center gap-1 rounded-xl bg-secondary p-1 text-muted-foreground',
         className,
       )}
       {...props}

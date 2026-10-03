@@ -50,7 +50,9 @@ describe('Catalogue (e2e)', () => {
         .expect(200);
       const { body } = await kitchen.get('/api/reference').expect(200);
       const lists = body as ReferenceDataDto;
-      expect(lists.allergens.map((a) => [a.name, a.isActive])).toEqual([
+      // Only this file's items: other e2e files add their own to the shared test database.
+      const ours = lists.allergens.filter((a) => ['Dairy', 'Nuts'].includes(a.name));
+      expect(ours.map((a) => [a.name, a.isActive])).toEqual([
         ['Dairy', true],
         ['Nuts', false],
       ]);

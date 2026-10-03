@@ -13,7 +13,11 @@ export const ROLE_DEFINITIONS = [
     description:
       'Everything: catalogue, pricing, companies, employees, orders, billing, settings, staff. Can override anything.',
     homeDashboard: Dashboard.ADMIN,
-    permissions: Object.values(Permission),
+    // Everything except DELIVERIES_OWN, which is what makes someone a driver (assignable to
+    // drops). Admins deliver on a driver's behalf through DELIVERIES_ANY instead.
+    permissions: Object.values(Permission).filter(
+      (permission) => permission !== Permission.DELIVERIES_OWN,
+    ),
   },
   {
     key: 'kitchen',
