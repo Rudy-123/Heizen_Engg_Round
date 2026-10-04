@@ -39,47 +39,47 @@ export default function LoginPage() {
           <p className="mt-auto text-xs text-foreground/60">For Fernleaf Kitchen staff only.</p>
         </div>
 
-        <MealBowl
-          idPrefix="bowl-wide"
-          className="pointer-events-none absolute -right-20 -bottom-16 w-[30rem] drop-shadow-xl"
-        />
+        {/* Sized by the screen so the whole bowl shows and never covers the text above it. */}
+        <div className="pointer-events-none absolute right-8 bottom-8 aspect-square w-[min(30rem,32vw,calc(100vh-26rem))]">
+          <MealBowl idPrefix="bowl-wide" className="size-full drop-shadow-xl" />
 
-        {/* A glimpse of the product, floating over the bowl (hidden on short screens). */}
-        <div className="pointer-events-none absolute inset-0 [@media(max-height:760px)]:hidden">
-          <FloatingCard className="right-[19rem] bottom-[19rem] rotate-[-2deg]">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
-              <ChefHat className="size-4.5" />
-            </span>
-            <span>
-              <span className="block text-sm font-semibold">Paneer tikka rice bowl</span>
-              <span className="block text-xs text-muted-foreground">
-                42 boxes · Tandoor station
+          {/* A glimpse of the product, floating over the bowl (hidden on small screens). */}
+          <div className="max-xl:hidden [@media(max-height:760px)]:hidden">
+            <FloatingCard className="right-[80%] bottom-[77%] rotate-[-2deg]">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
+                <ChefHat className="size-4.5" />
               </span>
-            </span>
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">
-              <CircleCheck className="size-3" /> Ready
-            </span>
-          </FloatingCard>
-          <FloatingCard className="right-[22rem] bottom-[11rem] rotate-[1.5deg]">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
-              <Truck className="size-4.5" />
-            </span>
-            <span>
-              <span className="block text-sm font-semibold">Out for delivery</span>
-              <span className="block text-xs text-muted-foreground">
-                12 boxes · due 12:30 · on time
+              <span>
+                <span className="block text-sm font-semibold">Paneer tikka rice bowl</span>
+                <span className="block text-xs text-muted-foreground">
+                  42 boxes · Tandoor station
+                </span>
               </span>
-            </span>
-          </FloatingCard>
-          <FloatingCard className="right-8 bottom-[29rem] rotate-[2deg]">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
-              <AlarmClock className="size-4.5" />
-            </span>
-            <span>
-              <span className="block text-sm font-semibold">Wednesday’s orders lock</span>
-              <span className="block text-xs text-muted-foreground">Monday at 16:00</span>
-            </span>
-          </FloatingCard>
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">
+                <CircleCheck className="size-3" /> Ready
+              </span>
+            </FloatingCard>
+            <FloatingCard className="right-[90%] bottom-[50%] rotate-[1.5deg]">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
+                <Truck className="size-4.5" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">Out for delivery</span>
+                <span className="block text-xs text-muted-foreground">
+                  12 boxes · due 12:30 · on time
+                </span>
+              </span>
+            </FloatingCard>
+            <FloatingCard className="right-0 bottom-[86%] rotate-[2deg]">
+              <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
+                <AlarmClock className="size-4.5" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">Wednesday’s orders lock</span>
+                <span className="block text-xs text-muted-foreground">Monday at 16:00</span>
+              </span>
+            </FloatingCard>
+          </div>
         </div>
       </section>
 
@@ -107,7 +107,7 @@ export default function LoginPage() {
 function FloatingCard({ className, children }: { className: string; children: ReactNode }) {
   return (
     <div
-      className={`absolute flex items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lift backdrop-blur ${className}`}
+      className={`absolute flex w-max items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lift backdrop-blur ${className}`}
     >
       {children}
     </div>

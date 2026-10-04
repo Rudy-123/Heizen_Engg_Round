@@ -16,8 +16,6 @@ today's kitchen in motion and the next days' orders, whichever day you open it
 | Dispatch | dispatch@test.com | Test@1234 | Dispatch dashboard, dispatch board |
 | Driver   | driver@test.com   | Test@1234 | My deliveries (today's own drops)  |
 
-On the demo deployment the sign-in page also offers one-click buttons for the four accounts.
-
 **Kitchen time zone: Asia/Kolkata.** Every delivery date, cut-off, "today", planned time and
 on-time check is worked out in that zone, whatever the zone of the server (UTC on Render) or
 the browser. It is one environment variable, `KITCHEN_TIME_ZONE`. Prices are US dollars,
