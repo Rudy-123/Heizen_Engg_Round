@@ -5,7 +5,7 @@ build the catalogue, menus and price tiers, set up companies and their employees
 on employees' behalf, cook them station by station, dispatch and deliver them, and bill each
 company. Employees never sign in - they are customers, kept as data.
 
-**Live app: https://web-blue-xi-42.vercel.app** - it already holds two weeks of history,
+**Live app: https://web-fernleaf-kitchen.vercel.app** - it already holds two weeks of history,
 today's kitchen in motion and the next days' orders, whichever day you open it
 ([Demo data](#demo-data)).
 
