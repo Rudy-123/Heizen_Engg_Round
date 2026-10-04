@@ -6,6 +6,7 @@ import {
   companyListQuerySchema,
   createCompanySchema,
   createKitchenHolidaySchema,
+  employeeImportSchema,
   employeeInputSchema,
   employeeListQuerySchema,
   type CompanyAddressInput,
@@ -16,6 +17,8 @@ import {
   type CreateKitchenHolidayInput,
   type DriverOptionDto,
   type EmployeeDto,
+  type EmployeeImportInput,
+  type EmployeeImportResultDto,
   type EmployeeInput,
   type EmployeeListQuery,
   type Page,
@@ -159,6 +162,16 @@ export class EmployeesController {
     @Body(new ZodValidationPipe(employeeInputSchema)) body: EmployeeInput,
   ): Promise<EmployeeDto> {
     return this.employees.create(body);
+  }
+
+  /** [Should] Bulk import from a CSV file: good rows are saved, bad rows reported (spec 4.5). */
+  @RequirePermissions('EMPLOYEES_WRITE')
+  @Post('import')
+  @HttpCode(200)
+  importCsv(
+    @Body(new ZodValidationPipe(employeeImportSchema)) body: EmployeeImportInput,
+  ): Promise<EmployeeImportResultDto> {
+    return this.employees.importCsv(body);
   }
 
   @RequirePermissions('EMPLOYEES_WRITE')

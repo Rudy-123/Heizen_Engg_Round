@@ -182,6 +182,47 @@ export const employeeInputSchema = z.object({
 
 export type EmployeeInput = z.infer<typeof employeeInputSchema>;
 
+/**
+ * [Should] Bulk import (spec 4.5): a CSV file of one company's employees. Each row is checked
+ * with the same rules as adding one employee; good rows are saved, bad rows are reported.
+ */
+export const EMPLOYEE_CSV_COLUMNS = [
+  'first_name',
+  'last_name',
+  'email',
+  'phone',
+  'can_choose_address',
+  'can_change_delivery_time',
+  'can_change_packaging',
+  'allergies',
+  'dietary_preferences',
+] as const;
+
+/** Body of POST /api/employees/import: the CSV file's text (about 10,000 rows at most). */
+export const employeeImportSchema = z.object({
+  companyId: z.string().min(1, { message: 'Pick the company.' }),
+  csv: z
+    .string()
+    .min(1, { message: 'The file is empty.' })
+    .max(1_000_000, { message: 'The file is too large (1 MB at most).' }),
+});
+
+export type EmployeeImportInput = z.infer<typeof employeeImportSchema>;
+
+export interface EmployeeImportRowError {
+  /** The row's line in the file, counting the header as row 1 - as a spreadsheet shows it. */
+  row: number;
+  email: string | null;
+  messages: string[];
+}
+
+export interface EmployeeImportResultDto {
+  /** Rows read (blank rows don't count). */
+  rows: number;
+  created: number;
+  errors: EmployeeImportRowError[];
+}
+
 export const employeeListQuerySchema = pageQuerySchema.extend({
   companyId: z.string().min(1).optional(),
   search: z.string().trim().max(80).optional(),

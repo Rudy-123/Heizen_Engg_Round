@@ -1,7 +1,7 @@
 'use client';
 
 import type { CompanyDetailDto, EmployeeDto } from '@fernleaf/shared';
-import { Clock, Crown, MapPin, Package, Plus, Search, TriangleAlert } from 'lucide-react';
+import { Clock, Crown, FileUp, MapPin, Package, Plus, Search, TriangleAlert } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { useEmployees } from '@/lib/company-queries';
 import { useCan } from '@/lib/session';
 import { cn } from '@/lib/utils';
 import { EmployeeDialog } from '../employee-dialog';
+import { ImportEmployeesDialog } from './import-employees-dialog';
 
 const PAGE_SIZE = 20;
 
@@ -31,6 +32,7 @@ export function EmployeesTab({ company }: { company: CompanyDetailDto }) {
   const [status, setStatus] = useState<'active' | 'inactive' | 'all'>('active');
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<EmployeeDto | 'new' | null>(null);
+  const [importing, setImporting] = useState(false);
   const deferredSearch = useDeferredValue(search.trim());
   const employees = useEmployees({
     companyId: company.id,
@@ -75,9 +77,14 @@ export function EmployeesTab({ company }: { company: CompanyDetailDto }) {
           <option value="all">Everyone</option>
         </select>
         {canEdit ? (
-          <Button onClick={() => setEditing('new')}>
-            <Plus /> Add employee
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setImporting(true)}>
+              <FileUp /> Import CSV
+            </Button>
+            <Button onClick={() => setEditing('new')}>
+              <Plus /> Add employee
+            </Button>
+          </>
         ) : null}
       </div>
 
@@ -175,6 +182,14 @@ export function EmployeesTab({ company }: { company: CompanyDetailDto }) {
         </div>
       ) : null}
 
+      {importing ? (
+        <ImportEmployeesDialog
+          company={company}
+          allergenExample={reference.data?.allergens[0]?.name}
+          dietExample={reference.data?.['dietary-tags'][0]?.name}
+          onClose={() => setImporting(false)}
+        />
+      ) : null}
       {editing ? (
         <EmployeeDialog
           employee={editing === 'new' ? null : editing}

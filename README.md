@@ -251,9 +251,9 @@ Commons, bundled with the web app and credited in
 [`apps/web/public/dishes/CREDITS.md`](apps/web/public/dishes/CREDITS.md); a dish can also point at
 any image URL.
 
-**Tests.** 96 unit tests on the pure rules (money, pricing, cut-off calendar, menu resolution,
-combinations, order and kitchen/dispatch rules, demo planning) and 122 end-to-end tests of the API
-over HTTP against a real throwaway Postgres: sign-in and the permission matrix, every route
+**Tests.** 102 unit tests on the pure rules (money, pricing, cut-off calendar, menu resolution,
+combinations, order and kitchen/dispatch rules, demo planning, CSV reading) and 124 end-to-end
+tests of the API over HTTP against a real throwaway Postgres: sign-in and the permission matrix, every route
 declaring its access, order pricing and snapshots, server-side validation, cut-off locks and
 idempotency, kitchen and dispatch rules under concurrency, invoicing races and credits, dashboards,
 the seed's rules and idempotency, and the demo simulation. No UI tests (the brief allows that).
@@ -335,13 +335,17 @@ drop is out for delivery. Not shown: prices, other drivers' drops, other days.
   rule enforced by the API, with errors placed on the exact field.
 - **[Should] portions**: options are sold in sizes with an extra charge (Regular, Large); an option
   group that uses sizes checks that every option it offers is sold in each of them.
+- **[Should] CSV import of employees** (company → Employees → Import CSV, with a template to
+  download): the API reads the file and checks every row with exactly the rules of adding one
+  employee (email on the company's domain and not taken, names, yes/no flags, allergies and
+  dietary preferences by name, duplicates within the file). Good rows are saved; each bad row is
+  reported with its line number and what to fix - the file is never rejected as a whole.
 - Section 7: money in integer cents, kitchen-zone time, the concurrency cases above, server-side
   pagination and filtering, tests for cut-off, pricing, combinations and invoicing, clean lint and
   type-check in CI.
 
 ### Skipped, and why
 
-- **[Should] CSV import of employees** - TODO before submission: built or listed here.
 - **A role editor screen**: roles are rows and need no code to add, but there is no screen to
   create one - the Staff page shows each role's permissions read-only. The time went into rules.
 - **Image upload for dishes**: a dish takes an image URL (or a bundled photo); upload would need

@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import type { EmployeeDto, EmployeeInput, EmployeeListQuery, Page } from '@fernleaf/shared';
+import {
+  employeeInputSchema,
+  type EmployeeDto,
+  type EmployeeImportInput,
+  type EmployeeImportResultDto,
+  type EmployeeInput,
+  type EmployeeListQuery,
+  type Page,
+} from '@fernleaf/shared';
 import { checkIdsExist } from '../catalogue/reference-checks.js';
-import { BusinessRuleError, NotFoundError } from '../common/errors/domain-error.js';
+import { BusinessRuleError, DomainError, NotFoundError } from '../common/errors/domain-error.js';
+import { normaliseHeader, parseCsv, parseYesNo, splitList } from '../domain/csv.js';
 import { isUniqueViolation } from '../common/errors/prisma-errors.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -136,6 +145,107 @@ export class EmployeesService {
     }
   }
 
+  /**
+   * [Should] Bulk import (spec 4.5). Every row of the CSV file is checked with exactly the rules
+   * of adding one employee and saved on its own, so a bad row never blocks the others; each
+   * bad row comes back with its line number and what to fix. Headers are matched loosely
+   * ("First name", "first_name"); allergies and dietary preferences are names separated by
+   * semicolons; yes/no columns accept yes/no, true/false, 1/0 (empty = no).
+   */
+  async importCsv(input: EmployeeImportInput): Promise<EmployeeImportResultDto> {
+    const company = await this.prisma.company.findUnique({
+      where: { id: input.companyId },
+      select: { id: true },
+    });
+    if (!company) throw new NotFoundError('Company');
+
+    const [header = [], ...rows] = parseCsv(input.csv);
+    const columns = header.map((name) => {
+      const key = normaliseHeader(name);
+      return COLUMN_ALIASES[key] ?? key;
+    });
+    const missing = REQUIRED_COLUMNS.filter((column) => !columns.includes(column.key));
+    if (missing.length > 0) {
+      const message = `The first row must name the columns. Missing: ${missing.map((c) => c.label).join(', ')}.`;
+      throw new BusinessRuleError('CSV_COLUMNS_MISSING', message, [{ path: 'csv', message }]);
+    }
+    if (rows.length > 10_000) {
+      const message = 'At most 10,000 employees per file - split it into smaller files.';
+      throw new BusinessRuleError('CSV_TOO_LONG', message, [{ path: 'csv', message }]);
+    }
+
+    const [allergens, tags] = await Promise.all([
+      this.prisma.allergen.findMany({ select: { id: true, name: true } }),
+      this.prisma.dietaryTag.findMany({ select: { id: true, name: true } }),
+    ]);
+    const idsByName = (list: { id: string; name: string }[]) =>
+      new Map(list.map((item) => [item.name.toLowerCase(), item.id]));
+    const allergenIds = idsByName(allergens);
+    const tagIds = idsByName(tags);
+
+    const result: EmployeeImportResultDto = { rows: 0, created: 0, errors: [] };
+    const firstRowOf = new Map<string, number>();
+    for (const [index, cells] of rows.entries()) {
+      const row = index + 2; // the header is row 1, as a spreadsheet numbers them
+      if (cells.every((cell) => cell.trim() === '')) continue;
+      result.rows += 1;
+      const messages: string[] = [];
+      const value = (column: string) => (cells[columns.indexOf(column)] ?? '').trim();
+      const flag = (column: string, label: string) => {
+        const parsed = parseYesNo(value(column));
+        if (parsed === null) messages.push(`${label}: use yes or no (not "${value(column)}").`);
+        return parsed ?? false;
+      };
+      const names = (column: string, ids: Map<string, string>, what: string) => [
+        ...new Set(
+          splitList(value(column)).flatMap((name) => {
+            const id = ids.get(name.toLowerCase());
+            if (!id) messages.push(`Unknown ${what} "${name}".`);
+            return id ? [id] : [];
+          }),
+        ),
+      ];
+
+      const email = value('email').toLowerCase();
+      const candidate = {
+        companyId: company.id,
+        firstName: value('firstname'),
+        lastName: value('lastname'),
+        email,
+        phone: value('phone') || null,
+        canChooseAddress: flag('canchooseaddress', 'can_choose_address'),
+        canChangeDeliveryTime: flag('canchangedeliverytime', 'can_change_delivery_time'),
+        canChangePackaging: flag('canchangepackaging', 'can_change_packaging'),
+        allergenIds: names('allergies', allergenIds, 'allergy'),
+        dietaryTagIds: names('dietarypreferences', tagIds, 'dietary preference'),
+        isActive: true,
+      };
+      const earlier = email ? firstRowOf.get(email) : undefined;
+      if (earlier) messages.push(`The same email is already on row ${earlier} of this file.`);
+      else if (email) firstRowOf.set(email, row);
+
+      const parsed = employeeInputSchema.safeParse(candidate);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          const field = String(issue.path[0]);
+          messages.push(`${COLUMN_LABELS[field] ?? field}: ${issue.message}`);
+        }
+      }
+      if (parsed.success && messages.length === 0) {
+        try {
+          await this.create(parsed.data);
+          result.created += 1;
+          continue;
+        } catch (error) {
+          if (!(error instanceof DomainError)) throw error;
+          messages.push(...(error.fieldErrors?.map((f) => f.message) ?? [error.message]));
+        }
+      }
+      result.errors.push({ row, email: email || null, messages });
+    }
+    return result;
+  }
+
   /** The email must be on one of the company's domains - that is how a company owns its people. */
   private async checkEmailOnCompanyDomain(input: EmployeeInput): Promise<void> {
     const company = await this.prisma.company.findUnique({
@@ -173,6 +283,28 @@ export class EmployeesService {
     ]);
   }
 }
+
+const REQUIRED_COLUMNS = [
+  { key: 'firstname', label: 'first_name' },
+  { key: 'lastname', label: 'last_name' },
+  { key: 'email', label: 'email' },
+];
+
+/** Other names people give the same columns. */
+const COLUMN_ALIASES: Record<string, string> = {
+  allergens: 'allergies',
+  dietary: 'dietarypreferences',
+  diet: 'dietarypreferences',
+  mobile: 'phone',
+};
+
+/** Field names in error messages, as the CSV's columns call them. */
+const COLUMN_LABELS: Record<string, string> = {
+  firstName: 'first_name',
+  lastName: 'last_name',
+  email: 'email',
+  phone: 'phone',
+};
 
 function employeeFields(input: EmployeeInput) {
   return {
