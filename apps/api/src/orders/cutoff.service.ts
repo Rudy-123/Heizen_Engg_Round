@@ -82,6 +82,7 @@ export class CutoffService {
               orderId: draft.id,
               type: 'CANCELLED' as const,
               actorId,
+              createdAt: now,
               message: `Cancelled at the cut-off - it was still a draft (${how}).`,
             })),
           });
@@ -119,6 +120,7 @@ export class CutoffService {
               orderId: order.id,
               type: 'CONFIRMED' as const,
               actorId,
+              createdAt: now,
               message: `Confirmed at the cut-off (${how}) - now billable to ${order.company.name}.`,
             })),
           });
@@ -131,6 +133,7 @@ export class CutoffService {
             actorId,
             cancelledCount: drafts.length,
             confirmedCount: placed.length,
+            ranAt: now,
           },
           include: runInclude,
         });
@@ -177,9 +180,13 @@ export class CutoffService {
       this.prisma.cutoffRun.findMany({
         where: { deliveryDate: range },
         include: runInclude,
-        orderBy: { ranAt: 'desc' },
+        orderBy: [{ ranAt: 'desc' }, { id: 'desc' }],
       }),
-      this.prisma.cutoffRun.findMany({ include: runInclude, orderBy: { ranAt: 'desc' }, take: 10 }),
+      this.prisma.cutoffRun.findMany({
+        include: runInclude,
+        orderBy: [{ ranAt: 'desc' }, { id: 'desc' }],
+        take: 10,
+      }),
     ]);
 
     const days: CutoffDayDto[] = dates.map((date) => {

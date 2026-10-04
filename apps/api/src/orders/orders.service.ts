@@ -297,11 +297,13 @@ export class OrdersService {
         ...headerFields(prepared, input.notes),
         createdById: actor.id,
         placedAt: input.place ? now : null,
+        createdAt: now,
         lines: { create: linesCreate(prepared.lines) },
         events: {
           create: {
             type: input.place ? 'PLACED' : 'CREATED',
             actorId: actor.id,
+            createdAt: now,
             message: input.place
               ? `Placed for ${formatCents(prepared.totalCents)} - prices are now locked.`
               : `Saved as a draft (${formatCents(prepared.totalCents)} at today’s prices).`,
@@ -336,6 +338,7 @@ export class OrdersService {
             create: {
               type: 'UPDATED',
               actorId: actor.id,
+              createdAt: this.clock.now(),
               message: `Changed: ${describeOrder(prepared)}.`,
             },
           },
@@ -385,6 +388,7 @@ export class OrdersService {
               type: 'PLACED',
               actorId: actor.id,
               message: `Placed for ${formatCents(prepared.totalCents)} - prices are now locked.`,
+              createdAt: this.clock.now(),
             },
           },
         },
@@ -486,6 +490,7 @@ export class OrdersService {
             create: {
               type: 'DELIVERY_CHANGED',
               actorId: actor.id,
+              createdAt: this.clock.now(),
               message: `Delivery changed to ${minutesToTime(input.deliveryTimeMinutes)}, ${addressText(address)}, ${packaging.name} (was ${was}).`,
             },
           },
@@ -718,6 +723,7 @@ export class OrdersService {
             create: {
               type: cancelling ? 'CANCELLED' : 'REJECTED',
               actorId: actor.id,
+              createdAt: now,
               message: `${cancelling ? 'Cancelled' : 'Rejected'}: ${reason}`,
             },
           },
@@ -738,6 +744,7 @@ export class OrdersService {
             reason: cancelling ? 'CANCELLED_AFTER_INVOICE' : 'REJECTED_AFTER_INVOICE',
             note: reason,
             createdById: actor.id,
+            createdAt: now,
           },
         });
         await tx.orderEvent.create({
@@ -745,6 +752,7 @@ export class OrdersService {
             orderId: id,
             type: 'CREDITED',
             actorId: actor.id,
+            createdAt: now,
             message: `The order was already invoiced: a credit of ${formatCents(owed)} goes on the company’s next invoice.`,
           },
         });

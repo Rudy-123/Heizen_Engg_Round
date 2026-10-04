@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
@@ -10,6 +11,9 @@ import type { Env } from '../../config/env.js';
  * and the demo simulator can replay past days. "Today" is always the kitchen's calendar
  * date, never the server's or the browser's (spec §7, time zones).
  */
+/** Set only inside ClockService.runAt: the moment the code running there should see. */
+const simulatedNow = new AsyncLocalStorage<Date>();
+
 @Injectable()
 export class ClockService {
   readonly kitchenTimeZone: string;
@@ -19,7 +23,17 @@ export class ClockService {
   }
 
   now(): Date {
-    return new Date();
+    return simulatedNow.getStore() ?? new Date();
+  }
+
+  /**
+   * Runs `work` as if the time were `at`: every clock read inside it - and in everything it
+   * awaits - returns `at`. Only the demo simulation uses this, to replay a kitchen day with
+   * realistic times. Requests running at the same moment are not affected: they see the
+   * real time.
+   */
+  runAt<T>(at: Date, work: () => Promise<T>): Promise<T> {
+    return simulatedNow.run(at, work);
   }
 
   /** The current moment, expressed in the kitchen's time zone. */

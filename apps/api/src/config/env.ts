@@ -16,6 +16,14 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, { message: 'must be at least 32 characters long' }),
   /** How long a sign-in lasts. 12 h covers a kitchen shift. */
   SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(72).default(12),
+  /**
+   * "true" keeps realistic demo orders flowing (see src/demo): history for the last two
+   * weeks, today's kitchen and deliveries moving with the clock, the next days' orders.
+   */
+  DEMO_MODE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   KITCHEN_TIME_ZONE: z
     .string()
     .default('Asia/Kolkata')

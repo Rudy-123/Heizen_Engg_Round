@@ -6,5 +6,6 @@ import { KitchenService } from './kitchen.service.js';
 @Module({
   controllers: [KitchenController],
   providers: [KitchenService],
+  exports: [KitchenService],
 })
 export class KitchenModule {}

@@ -31,6 +31,8 @@ const api = spawn(process.execPath, ['dist/main.js'], {
     DATABASE_URL: database.url,
     JWT_SECRET: 'sandbox-only-secret-that-is-at-least-32-characters',
     NODE_ENV: 'development',
+    // The sandbox shows the same living demo kitchen as the live app.
+    DEMO_MODE: 'true',
   },
 });
 

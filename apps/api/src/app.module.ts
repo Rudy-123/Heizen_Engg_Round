@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './common/errors/all-exceptions.filter.js';
 import { validateEnv } from './config/env.js';
 import { CompaniesModule } from './companies/companies.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
+import { DemoModule } from './demo/demo.module.js';
 import { DispatchModule } from './dispatch/dispatch.module.js';
 import { HealthModule } from './health/health.module.js';
 import { KitchenModule } from './kitchen/kitchen.module.js';
@@ -44,6 +45,7 @@ import { StaffModule } from './staff/staff.module.js';
     DispatchModule,
     BillingModule,
     DashboardModule,
+    DemoModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })

@@ -6,5 +6,6 @@ import { DispatchService } from './dispatch.service.js';
 @Module({
   controllers: [DispatchController, DriverController],
   providers: [DispatchService],
+  exports: [DispatchService],
 })
 export class DispatchModule {}
