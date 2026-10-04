@@ -104,6 +104,13 @@ packages/shared  zod request schemas, response types, money and time helpers -
   `lines.0.combinations.1.choices`.
 - **Boards poll** every 20 seconds (TanStack Query) instead of using websockets: fresh enough for
   a kitchen, and nothing extra to host.
+- **A busy day stays fast.** A load test puts 440 confirmed orders on one day: the kitchen board
+  API answers in about 80 ms (284 KB), and the page only lays out the cards on screen
+  (`content-visibility`), so scrolling stays smooth.
+- **Server-side pagination where lists grow with use**: orders (filtered by delivery date range,
+  status, company and invoiced, plus search by number, employee name or email), employees and
+  invoices. Companies, dishes, options and staff are short lists the kitchen curates by hand; they
+  load whole, with in-page search.
 
 ### Access control
 
@@ -252,11 +259,11 @@ Commons, bundled with the web app and credited in
 any image URL.
 
 **Tests.** 102 unit tests on the pure rules (money, pricing, cut-off calendar, menu resolution,
-combinations, order and kitchen/dispatch rules, demo planning, CSV reading) and 124 end-to-end
+combinations, order and kitchen/dispatch rules, demo planning, CSV reading) and 125 end-to-end
 tests of the API over HTTP against a real throwaway Postgres: sign-in and the permission matrix, every route
 declaring its access, order pricing and snapshots, server-side validation, cut-off locks and
 idempotency, kitchen and dispatch rules under concurrency, invoicing races and credits, dashboards,
-the seed's rules and idempotency, and the demo simulation. No UI tests (the brief allows that).
+the seed's rules and idempotency, CSV import, the demo simulation, and a 440-order kitchen board. No UI tests (the brief allows that).
 
 ## Dashboards
 

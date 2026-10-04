@@ -28,6 +28,7 @@ import {
 import { selectClassName } from '@/lib/catalogue-queries';
 import { formatIsoDate } from '@/lib/format';
 import { useKitchenToday } from '@/lib/kitchen-clock';
+import { useCompanies } from '@/lib/company-queries';
 import { useOrders } from '@/lib/order-queries';
 import { useCan } from '@/lib/session';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,8 @@ export function OrdersView() {
   const [to, setTo] = useState('');
   const [statuses, setStatuses] = useState<string[]>([]);
   const [invoiced, setInvoiced] = useState<'yes' | 'no' | 'all'>('all');
+  const [companyId, setCompanyId] = useState('');
+  const companies = useCompanies();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const deferredSearch = useDeferredValue(search.trim());
@@ -56,6 +59,7 @@ export function OrdersView() {
     from,
     to,
     status: statuses,
+    companyId,
     invoiced,
     search: deferredSearch,
     page,
@@ -120,6 +124,22 @@ export function OrdersView() {
                 onChange={(event) => setRange(from, event.target.value)}
               />
             </div>
+            <select
+              className={cn(selectClassName, 'w-48')}
+              value={companyId}
+              aria-label="Company"
+              onChange={(event) => {
+                setCompanyId(event.target.value);
+                reset();
+              }}
+            >
+              <option value="">All companies</option>
+              {(companies.data ?? []).map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
             <select
               className={cn(selectClassName, 'w-40')}
               value={invoiced}
