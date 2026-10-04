@@ -34,8 +34,8 @@ export default function LoginPage() {
         </FloatingCard>
       </div>
 
-      {/* A glimpse of the product in the empty space on the left (wide, tall screens only). */}
-      <div className="pointer-events-none absolute inset-y-0 left-10 hidden xl:block [@media(max-height:720px)]:hidden">
+      {/* A glimpse of the product in the empty space on the left (wide screens only). */}
+      <div className="pointer-events-none absolute inset-y-0 left-10 hidden xl:block">
         <FloatingCard className="top-[30%] left-0 rotate-[-2deg]">
           <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-primary">
             <AlarmClock className="size-4.5" />
