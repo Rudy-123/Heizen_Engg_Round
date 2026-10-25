@@ -35,7 +35,8 @@ stored as integer cents (the brief's examples are in $), pre-tax, with no fees.
 
 ## Run it locally
 
-Needs Node 22.12+ and npm 10+. **No Docker and no database to install**: the sandbox starts a
+Needs Node 22.12+ and npm 10+ (or only Docker - see [With Docker](#with-docker)). **No database
+to install**: the sandbox starts a
 real PostgreSQL from an npm package (`embedded-postgres`), applies the migration files, seeds
 it and deletes it again when stopped.
 
@@ -55,6 +56,25 @@ Against your own Postgres instead: copy `apps/api/.env.example` to `apps/api/.en
 SQL files in `apps/api/prisma/migrations/` in order (that is how the live Supabase database is
 migrated - by hand, in its SQL editor), then `npm run db:seed -w @fernleaf/api` and
 `npm run dev -w @fernleaf/api`. Set `DEMO_MODE=true` for the living demo data.
+
+### With Docker
+
+Needs only Docker Desktop. One command runs PostgreSQL, the API and the site, each in its own
+container ([docker-compose.yml](docker-compose.yml), [apps/api/Dockerfile](apps/api/Dockerfile),
+[apps/web/Dockerfile](apps/web/Dockerfile)):
+
+```bash
+docker compose up -d --build          # db on :5433, API on :4000, site on http://localhost:3000
+docker compose run --rm db-setup      # first run only: apply migrations + seed (safe to repeat)
+docker compose logs -f api            # follow the API's logs
+docker compose down                   # stop; the data stays in the fernleaf-pgdata volume
+docker compose down -v                # stop and delete the data
+```
+
+Migrations never run on their own: `db-setup` is a separate service that only runs when asked.
+Demo data is on by default; `JWT_SECRET`, `DEMO_MODE`, `SESSION_TTL_HOURS` and
+`KITCHEN_TIME_ZONE` can be overridden in a `.env` file at the repo root. Stop any local
+`npm run dev` first - the containers use the same ports.
 
 Checks, from the repo root - the same ones CI runs on every push:
 

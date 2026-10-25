@@ -1,0 +1,21 @@
+# Everything the images rebuild themselves, plus secrets and files they never need.
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/src/generated
+**/*.tsbuildinfo
+**/coverage
+**/*.log
+
+# Secrets stay on the host - containers get their settings from docker-compose.yml.
+**/.env
+**/.env.*
+!**/.env.example
+
+.git
+.github
+.claude
+.vscode
+.idea
+*.pdf

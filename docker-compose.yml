@@ -1,0 +1,97 @@
+# The whole app on one machine: PostgreSQL + NestJS API + Next.js site.
+#
+#   docker compose up -d --build          start everything (http://localhost:3000)
+#   docker compose run --rm db-setup      apply migrations + seed (first run, or after a new migration)
+#   docker compose down                   stop (data is kept in the fernleaf-pgdata volume)
+#
+# Optional overrides go in a .env file next to this one (JWT_SECRET, DEMO_MODE, ...).
+
+# Containers show up as fernleaf-db-1, fernleaf-api-1, fernleaf-web-1, whatever the folder is called.
+name: fernleaf
+
+x-api-env: &api-env
+  DATABASE_URL: postgresql://postgres:postgres@db:5432/fernleaf
+  # Local-only default. Set your own in .env for anything shared.
+  JWT_SECRET: ${JWT_SECRET:-local-docker-only-secret-not-for-production-use}
+  SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+  KITCHEN_TIME_ZONE: ${KITCHEN_TIME_ZONE:-Asia/Kolkata}
+  DEMO_MODE: ${DEMO_MODE:-true}
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fernleaf
+    ports:
+      # 5433 on the host so it never clashes with a local Postgres on 5432.
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d fernleaf']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      <<: *api-env
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - '4000:4000'
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:4000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # The API as seen from inside the Docker network.
+        API_ORIGIN: http://api:4000
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Not started by `up`. Run on demand: docker compose run --rm db-setup
+  db-setup:
+    profiles: [setup]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    working_dir: /repo/apps/api
+    environment:
+      <<: *api-env
+    command: sh -c "npm run db:deploy && npm run db:seed"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    # A fixed name, so the data survives a renamed folder and is easy to find.
+    name: fernleaf-pgdata
